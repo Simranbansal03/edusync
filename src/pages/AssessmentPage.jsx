@@ -229,5 +229,5 @@ const AssessmentPage = () => {
     );
 };
 
-export default AssessmentPage;
+// export default AssessmentPage;
 export default AssessmentPage;
