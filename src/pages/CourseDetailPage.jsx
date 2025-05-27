@@ -25,26 +25,36 @@ const CourseDetailPage = () => {
     if (!url) return '';
 
     try {
-      // First, check if this is already a URL to our uploads directory
-      if (url.includes('/uploads/')) {
-        // Try to access the file directly first
-        const fullUrl = url.startsWith('http')
-          ? url
-          : `${window.API_CONFIG.BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+      console.log("[CourseDetail] Getting download URL for:", url);
 
-        console.log("Using direct file URL:", fullUrl);
+      // If it's already a full URL (including protocol), return it as is
+      if (url.startsWith('http')) {
+        console.log("[CourseDetail] URL is already absolute:", url);
+        return url;
+      }
+
+      // First, check if this is a path to our uploads directory
+      if (url.includes('/uploads/')) {
+        // Ensure we have the complete URL with our API base
+        const fullUrl = `${window.API_CONFIG.BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+        console.log("[CourseDetail] URL is uploads path, using:", fullUrl);
         return fullUrl;
       }
 
-      // Fall back to the download API endpoint
-      // Get the filename from the URL
-      const filename = url.split('/').pop();
+      // If it's just a filename (likely a GUID), use the download API endpoint
+      if (!url.includes('/')) {
+        const downloadUrl = `${window.API_CONFIG.BASE_URL}/api/CourseModels/download/${url}`;
+        console.log("[CourseDetail] URL is filename, using download endpoint:", downloadUrl);
+        return downloadUrl;
+      }
 
-      // Create a direct download URL
-      return `${window.API_CONFIG.BASE_URL}/api/CourseModels/download/${filename}`;
+      // For other cases, construct a proper URL with the API base
+      const finalUrl = `${window.API_CONFIG.BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+      console.log("[CourseDetail] Using constructed URL:", finalUrl);
+      return finalUrl;
     } catch (e) {
-      console.error('Error creating direct download URL:', e);
-      return url;
+      console.error("[CourseDetail] Error creating direct download URL:", e);
+      return url; // Return original URL as fallback
     }
   };
 
@@ -211,18 +221,38 @@ const CourseDetailPage = () => {
   // Function to handle file download
   const handleDownload = async (url, fileName) => {
     setDownloadError(null);
+    console.log("[CourseDetail] Initiating download for:", fileName, "URL:", url);
+
+    if (!url) {
+      setDownloadError("Invalid file URL. Please contact support.");
+      return;
+    }
+
     const success = await downloadFile(url, fileName);
     if (!success) {
+      console.error("[CourseDetail] Download failed for:", url);
       setDownloadError("Failed to download file. The file may not exist or the server is not responding.");
+    } else {
+      console.log("[CourseDetail] Download successful for:", fileName);
     }
   };
 
   // Function to handle file view in browser
   const handleViewInBrowser = (url) => {
     setDownloadError(null);
+    console.log("[CourseDetail] Opening in browser:", url);
+
+    if (!url) {
+      setDownloadError("Invalid file URL. Please contact support.");
+      return;
+    }
+
     const success = openFileInBrowser(url);
     if (!success) {
+      console.error("[CourseDetail] Failed to open in browser:", url);
       setDownloadError("Failed to open file in browser. The file may not exist or the server is not responding.");
+    } else {
+      console.log("[CourseDetail] Successfully opened in browser:", url);
     }
   };
 

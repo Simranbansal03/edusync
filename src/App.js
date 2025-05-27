@@ -24,6 +24,13 @@ import StudentProgressPage from "./pages/StudentProgressPage";
 import { AuthProvider } from './contexts/AuthContext';
 
 // Global configuration for API URLs
+// Old localhost configuration
+// window.API_CONFIG = {
+//   BASE_URL: 'https://localhost:7278',
+//   UPLOADS_PATH: '/uploads'
+// };
+
+// New Azure backend configuration
 window.API_CONFIG = {
   BASE_URL: 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net',
   UPLOADS_PATH: '/uploads'

@@ -23,57 +23,48 @@ const AllAssessmentsPage = () => {
             try {
                 setState(prevState => ({ ...prevState, loading: true }));
 
-                // Fetch assessments
+                // Fetch all assessments
                 const assessmentsResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/AssessmentModels`);
-                const assessmentsData = assessmentsResponse.data;
 
                 // Fetch courses for additional details
                 const coursesResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/CourseModels`);
-                const coursesData = coursesResponse.data;
 
-                // Create a course lookup map
+                // Create a lookup map for course details
                 const courseMap = {};
-                coursesData.forEach(course => {
-                    const id = course.courseId || course.CourseId;
-                    courseMap[id] = {
+                coursesResponse.data.forEach(course => {
+                    courseMap[course.courseId || course.CourseId] = {
                         title: course.title || course.Title,
-                        description: course.description || course.Description,
                         instructorId: course.instructorId || course.InstructorId
                     };
                 });
 
-                // Get unique instructor IDs from courses
-                const instructorIds = [...new Set(
-                    coursesData
-                        .map(course => course.instructorId || course.InstructorId)
-                        .filter(id => id) // Filter out undefined or null
-                )];
-
-                // Fetch instructors data
-                const instructorsMap = {};
-                if (instructorIds.length > 0) {
-                    const instructorPromises = instructorIds.map(instructorId =>
-                        axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${instructorId}`)
-                            .then(res => ({ id: instructorId, data: res.data }))
-                            .catch(err => {
-                                console.error(`Error fetching instructor ${instructorId}:`, err);
-                                return null;
+                // Fetch instructor details for each course
+                const instructorPromises = Object.values(courseMap)
+                    .filter(course => course.instructorId)
+                    .map(course => {
+                        return axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${course.instructorId}`)
+                            .then(response => {
+                                return { instructorId: course.instructorId, instructorData: response.data };
                             })
-                    );
-
-                    const instructorResults = await Promise.all(instructorPromises);
-
-                    instructorResults.forEach(result => {
-                        if (result) {
-                            instructorsMap[result.id] = result.data;
-                        }
+                            .catch(error => {
+                                console.error(`Error fetching instructor ${course.instructorId}:`, error);
+                                return { instructorId: course.instructorId, instructorData: null };
+                            });
                     });
-                }
+
+                const instructorResults = await Promise.all(instructorPromises);
+
+                const instructorsMap = {};
+                instructorResults.forEach(result => {
+                    if (result.instructorData) {
+                        instructorsMap[result.instructorId] = result.instructorData;
+                    }
+                });
 
                 setInstructors(instructorsMap);
 
                 // Combine assessment data with course data
-                const combinedAssessments = assessmentsData.map(assessment => {
+                const combinedAssessments = assessmentsResponse.data.map(assessment => {
                     const courseId = assessment.courseId || assessment.CourseId;
                     const courseInfo = courseMap[courseId] || { title: 'Unknown Course' };
                     const instructorId = courseInfo.instructorId;

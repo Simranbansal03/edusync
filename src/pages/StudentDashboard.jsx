@@ -4,7 +4,8 @@ import axios from 'axios';
 import '../styles/StudentDashboard.css';
 import { FaChalkboardTeacher } from 'react-icons/fa';
 
-const API_BASE_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api';
+// Define the API base URL using the global config
+const API_BASE_URL = `${window.API_CONFIG.BASE_URL}/api`;
 
 const StudentDashboard = () => {
     const [courses, setCourses] = useState([]);

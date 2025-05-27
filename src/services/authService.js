@@ -46,7 +46,8 @@
 // };
 import axios from 'axios';
 
-const API_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api/auth/'; // Azure backend URL
+// Use the global API config instead of hardcoded URL
+const API_URL = `${window.API_CONFIG.BASE_URL}/api/auth/`;
 
 // Create axios instance with interceptors for JWT
 const axiosInstance = axios.create();

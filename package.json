@@ -2,6 +2,14 @@
   "name": "edusync",
   "version": "0.1.0",
   "private": true,
+  /*
+   * Note about proxy configuration:
+   * For local development, you might need to add a "proxy" field pointing to your backend:
+   * "proxy": "https://localhost:7278"
+   * 
+   * For production deployment on Azure, this is not needed as we're using the full URLs
+   * configured in window.API_CONFIG in App.js
+   */
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@testing-library/dom": "^10.4.0",
@@ -41,6 +49,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "proxy": "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net"
+  }
 }

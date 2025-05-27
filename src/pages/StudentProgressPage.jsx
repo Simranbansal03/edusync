@@ -4,7 +4,8 @@ import axios from 'axios';
 import '../styles/StudentProgressPage.css';
 import { FaGraduationCap, FaBook, FaClipboardList, FaSearch, FaChartBar } from 'react-icons/fa';
 
-const API_BASE_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api';
+// Use global API configuration
+const API_BASE_URL = `${window.API_CONFIG.BASE_URL}/api`;
 
 // Create axios instance with retry and caching
 const apiClient = axios.create({

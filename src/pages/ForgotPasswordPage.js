@@ -15,6 +15,9 @@ const ForgotPasswordPage = () => {
     const [message, setMessage] = useState({ type: "", text: "" });
     const navigate = useNavigate();
 
+    // Define the API base URL using the global config
+    const API_BASE_URL = `${window.API_CONFIG.BASE_URL}/api`;
+
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -57,7 +60,6 @@ const ForgotPasswordPage = () => {
         setMessage({ type: "", text: "" });
 
         try {
-            const API_BASE_URL = "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api";
             const url = `${API_BASE_URL}/UserModels/resetpassword`;
 
             console.log("Sending request to:", url);

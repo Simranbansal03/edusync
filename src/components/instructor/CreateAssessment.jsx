@@ -3,7 +3,11 @@ import axios from "axios";
 import { useAuth } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import '../../styles/CreateAssessment.css'
-const API_BASE_URL = "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api";
+// Old hardcoded URL
+// const API_BASE_URL = "https://localhost:7278/api";
+
+// Use global API configuration
+const API_BASE_URL = `${window.API_CONFIG.BASE_URL}/api`;
 
 const defaultOption = { a: "", b: "", c: "", d: "" };
 
@@ -35,7 +39,7 @@ export default function CreateAssessment() {
     useEffect(() => {
         // Fetch courses for dropdown
         axios
-            .get(`${"https://localhost:7278/api"}/CourseModels`)
+            .get(`${API_BASE_URL}/CourseModels`)
             .then((res) => {
                 // Filter to only instructor's courses
                 const uid = currentUser?.id || currentUser?.userId;

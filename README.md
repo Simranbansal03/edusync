@@ -1,6 +1,34 @@
-# Getting Started with Create React App
+# EduSync - Learning Management System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+EduSync is a modern learning management system that allows instructors to create courses and assessments, and students to enroll in courses and take assessments.
+
+## Environment Configuration
+
+The application is configured to work with different environments:
+
+### Azure Deployment
+
+This project is configured to work with Azure Static Web Apps and connects to an Azure-hosted backend API. 
+
+The production configuration points to:
+- Frontend: https://agreeable-cliff-01fee0e00.6.azurestaticapps.net
+- Backend API: https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net
+
+The API URL configuration is set in `src/App.js` using the global `window.API_CONFIG` object.
+
+### Local Development Setup
+
+For local development:
+
+1. Clone the repository
+2. Run `npm install` to install dependencies
+3. If you need to connect to a local backend, update the `window.API_CONFIG` in `src/App.js` to point to your local API:
+   ```javascript
+   window.API_CONFIG = {
+     BASE_URL: 'https://localhost:7278',
+     UPLOADS_PATH: '/uploads'
+   };
+   ```
 
 ## Available Scripts
 
@@ -68,3 +96,31 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## CI/CD Pipeline
+
+This project uses Azure Pipelines for continuous integration and deployment. The pipeline configuration is in the `azure-pipelines-frontend.yml` file.
+
+## Features
+
+- User authentication and authorization (Student and Instructor roles)
+- Course creation and management
+- Assessment creation and grading
+- File uploads and downloads
+- Student progress tracking
+- Profile management
+
+## API Integration
+
+The application integrates with a .NET Core backend API. The API endpoints are accessed through:
+- Direct API calls using axios
+- Auth service for authentication
+- File service for file uploads and downloads
+
+## Technical Details
+
+- Built with React and React Router
+- Uses context API for state management
+- Responsive design with custom CSS
+- Supports file uploads and downloads
+- JWT-based authentication

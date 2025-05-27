@@ -17,17 +17,16 @@ const AssessmentPage = () => {
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        const fetchCourseDetails = async () => {
-            if (!courseId) return;
-
+        const fetchAssessment = async () => {
+            setIsLoading(true);
             try {
-                const response = await axios.get(
+                // First get the course to find the instructor
+                const courseResponse = await axios.get(
                     `${window.API_CONFIG.BASE_URL}/api/CourseModels/${courseId}`
                 );
-                setAssessment(response.data);
 
-                // Fetch instructor details if instructorId exists
-                const instructorId = response.data.instructorId || response.data.InstructorId;
+                // If we have instructor ID, fetch instructor details
+                const instructorId = courseResponse.data.instructorId || courseResponse.data.InstructorId;
                 if (instructorId) {
                     try {
                         const instructorResponse = await axios.get(
@@ -35,58 +34,43 @@ const AssessmentPage = () => {
                         );
                         setInstructor(instructorResponse.data);
                     } catch (err) {
-                        console.error("Error fetching instructor details:", err);
+                        console.error("Error fetching instructor:", err);
+                        // Don't set main error for instructor fetch failure
                     }
                 }
-            } catch (err) {
-                console.error("Error fetching course details:", err);
-            }
-        };
 
-        fetchCourseDetails();
-    }, [courseId]);
-
-    useEffect(() => {
-        const fetchAssessmentDetails = async () => {
-            setIsLoading(true);
-            try {
+                // Fetch assessment
                 const response = await axios.get(
                     `${window.API_CONFIG.BASE_URL}/api/AssessmentModels`
                 );
 
-                // Find the specific assessment
-                const assessmentData = response.data.find(
-                    a => String(a.assessmentId || a.AssessmentId) === String(courseId)
+                const courseAssessment = response.data.find(
+                    (a) => a.courseId === courseId || a.CourseId === courseId
                 );
 
-                if (!assessmentData) {
-                    setError("Assessment not found");
-                    setIsLoading(false);
-                    return;
+                if (courseAssessment) {
+                    const parsedQuestions = JSON.parse(courseAssessment.Questions || courseAssessment.questions);
+                    setAssessment({
+                        ...courseAssessment,
+                        Questions: parsedQuestions,
+                        AssessmentId: courseAssessment.assessmentId || courseAssessment.AssessmentId,
+                        Title: courseAssessment.title || courseAssessment.Title,
+                        CourseId: courseAssessment.courseId || courseAssessment.CourseId,
+                        MaxScore: courseAssessment.maxScore || courseAssessment.MaxScore
+                    });
+                    setAnswers(Array(parsedQuestions.length).fill(null));
+                } else {
+                    setError("No assessment found for this course");
                 }
-
-                setAssessment(assessmentData);
-
-                // Process questions
-                try {
-                    const questionsData = JSON.parse(assessmentData.questions || assessmentData.Questions);
-                    setAnswers(Array(questionsData.length).fill(null));
-                } catch (err) {
-                    console.error("Error parsing questions:", err);
-                    setError("Error loading assessment questions");
-                }
-
-                setIsLoading(false);
             } catch (err) {
-                console.error("Error fetching assessment:", err);
-                setError("Failed to load assessment. Please try again later.");
+                console.error("Error fetching data:", err);
+                setError("Failed to load assessment. Please try again.");
+            } finally {
                 setIsLoading(false);
             }
         };
 
-        if (courseId) {
-            fetchAssessmentDetails();
-        }
+        fetchAssessment();
     }, [courseId]);
 
     const handleOptionChange = (qIdx, optionKey) => {
@@ -121,11 +105,10 @@ const AssessmentPage = () => {
         try {
             // Submit to backend
             await axios.post(`${window.API_CONFIG.BASE_URL}/api/ResultModels`, {
-                StudentId: currentUser?.id || currentUser?.userId,
-                AssessmentId: assessment.assessmentId || assessment.AssessmentId,
-                CourseId: assessment.courseId || assessment.CourseId,
+                AssessmentId: assessment.AssessmentId,
+                UserId: currentUser?.id || currentUser?.userId,
                 Score: score,
-                Date: new Date().toISOString()
+                AttemptDate: new Date().toISOString()
             });
 
             // Calculate max possible score
@@ -229,5 +212,4 @@ const AssessmentPage = () => {
     );
 };
 
-// export default AssessmentPage;
 export default AssessmentPage;
