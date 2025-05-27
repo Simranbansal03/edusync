@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+// Hardcoded Azure backend URL
+const AZURE_API_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net';
+
 /**
  * Direct file service to handle file downloads without proxying
  * This service provides methods for working with files directly from their source
@@ -19,7 +22,7 @@ class FileService {
 
             // For files stored in the backend's uploads directory, construct the proper URL
             if (url.includes('/uploads/')) {
-                fileUrl = `${window.API_CONFIG.BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+                fileUrl = `${AZURE_API_URL}${url.startsWith('/') ? url : `/${url}`}`;
                 console.log("[FileService] Uploads path detected, using URL:", fileUrl);
             }
 
@@ -67,7 +70,7 @@ class FileService {
                 try {
                     console.log("[FileService] Attempting fallback to download endpoint");
                     const fileId = this.extractFileIdFromUrl(url);
-                    const downloadUrl = `${window.API_CONFIG.BASE_URL}/api/CourseModels/download/${fileId}`;
+                    const downloadUrl = `${AZURE_API_URL}/api/CourseModels/download/${fileId}`;
                     console.log("[FileService] Fallback download URL:", downloadUrl);
 
                     const response = await axios.get(downloadUrl, {
@@ -108,7 +111,7 @@ class FileService {
      */
     ensureAbsoluteUrl(url) {
         if (url && !url.startsWith('http')) {
-            return `${window.API_CONFIG.BASE_URL}${url.startsWith('/') ? url : `/${url}`}`;
+            return `${AZURE_API_URL}${url.startsWith('/') ? url : `/${url}`}`;
         }
         return url;
     }
@@ -212,8 +215,8 @@ export const uploadFile = async (file, progressCallback = null, token = null, co
 
         // Determine the endpoint based on whether we have a courseId
         const endpoint = courseId
-            ? `${window.API_CONFIG.BASE_URL}/api/CourseModels/upload/${courseId}`
-            : `${window.API_CONFIG.BASE_URL}/api/CourseModels/upload`;
+            ? `${AZURE_API_URL}/api/CourseModels/upload/${courseId}`
+            : `${AZURE_API_URL}/api/CourseModels/upload`;
 
         console.log(`Uploading file ${file.name} (${file.size} bytes) to ${endpoint}`);
 

@@ -46,8 +46,8 @@
 // };
 import axios from 'axios';
 
-// Use the global API config instead of hardcoded URL
-const API_URL = `${window.API_CONFIG.BASE_URL}/api/auth/`;
+// Hardcoded URL for Azure deployment
+const API_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api/auth/';
 
 // Create axios instance with interceptors for JWT
 const axiosInstance = axios.create();

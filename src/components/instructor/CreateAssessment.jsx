@@ -6,8 +6,8 @@ import '../../styles/CreateAssessment.css'
 // Old hardcoded URL
 // const API_BASE_URL = "https://localhost:7278/api";
 
-// Use global API configuration
-const API_BASE_URL = `${window.API_CONFIG.BASE_URL}/api`;
+// Hardcoded API URL with /api path
+const API_BASE_URL = "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api";
 
 const defaultOption = { a: "", b: "", c: "", d: "" };
 
