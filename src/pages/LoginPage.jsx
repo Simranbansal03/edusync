@@ -66,7 +66,7 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const API_BASE_URL = "https://localhost:7278/api";
+  const API_BASE_URL = "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api";
 
   const handleSubmit = async (e) => {
     e.preventDefault();

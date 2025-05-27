@@ -47,68 +47,68 @@ const ForgotPasswordPage = () => {
     };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    if (!validateForm()) {
-        return;
-    }
-
-    setIsLoading(true);
-    setMessage({ type: "", text: "" });
-
-    try {
-        const API_BASE_URL = "https://localhost:7278/api";
-        const url = `${API_BASE_URL}/UserModels/resetpassword`;
-        
-        console.log("Sending request to:", url);
-        
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: formData.email,
-                newPassword: formData.newPassword
-            })
-        });
-
-        const data = await response.json();
-        console.log("Response:", data);
-        
-        if (!response.ok) {
-            throw new Error(data.message || "Failed to reset password");
+        if (!validateForm()) {
+            return;
         }
 
-        setMessage({
-            type: "success",
-            text: "If your email exists in our system, your password has been reset."
-        });
+        setIsLoading(true);
+        setMessage({ type: "", text: "" });
 
-        // Clear the form
-        setFormData({
-            email: "",
-            newPassword: "",
-            confirmPassword: ""
-        });
+        try {
+            const API_BASE_URL = "https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api";
+            const url = `${API_BASE_URL}/UserModels/resetpassword`;
 
-        // Redirect to login after 3 seconds
-        setTimeout(() => {
-            navigate('/login', {
-                state: { message: "If your email exists, your password has been reset. Please try logging in with your new password." }
+            console.log("Sending request to:", url);
+
+            const response = await fetch(url, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    newPassword: formData.newPassword
+                })
             });
-        }, 3000);
-    } catch (error) {
-        console.error("Password reset error:", error);
-        
-        setMessage({
-            type: "error",
-            text: error.message || "Failed to reset password. Please try again."
-        });
-    } finally {
-        setIsLoading(false);
-    }
-};
+
+            const data = await response.json();
+            console.log("Response:", data);
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to reset password");
+            }
+
+            setMessage({
+                type: "success",
+                text: "If your email exists in our system, your password has been reset."
+            });
+
+            // Clear the form
+            setFormData({
+                email: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+
+            // Redirect to login after 3 seconds
+            setTimeout(() => {
+                navigate('/login', {
+                    state: { message: "If your email exists, your password has been reset. Please try logging in with your new password." }
+                });
+            }, 3000);
+        } catch (error) {
+            console.error("Password reset error:", error);
+
+            setMessage({
+                type: "error",
+                text: error.message || "Failed to reset password. Please try again."
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     return (
         <div className="auth-page">

@@ -17,87 +17,69 @@ const MyResultsPage = () => {
         passedCount: 0,
         highestScore: 0
     });
+    const [assessments, setAssessments] = useState({});
 
     useEffect(() => {
-        const fetchResults = async () => {
-            if (!currentUser?.userId) {
-                navigate('/login');
-                return;
-            }
-
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                // Fetch assessments for details
-                const assessmentsResponse = await axios.get('https://localhost:7278/api/AssessmentModels');
-                const assessments = assessmentsResponse.data;
+                // Fetch all assessments to get their details
+                const assessmentsResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/AssessmentModels`);
+                const assessmentsData = assessmentsResponse.data;
 
-                // Create a lookup map for assessment details
-                const assessmentMap = {};
-                assessments.forEach(assessment => {
+                // Create a map of assessment IDs to their data
+                const assessmentsMap = {};
+                assessmentsData.forEach(assessment => {
                     const id = assessment.assessmentId || assessment.AssessmentId;
-                    if (id) {
-                        assessmentMap[id] = {
-                            title: assessment.title || assessment.Title,
-                            maxScore: assessment.maxScore || assessment.MaxScore
-                        };
-                    }
+                    assessmentsMap[id] = assessment;
+                });
+                setAssessments(assessmentsMap);
+
+                // Fetch the user's results
+                const resultsResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/ResultModels`);
+                const userResults = resultsResponse.data.filter(result => {
+                    const studentId = result.studentId || result.StudentId;
+                    return String(studentId) === String(currentUser.userId);
                 });
 
-                // Fetch results
-                const resultsResponse = await axios.get('https://localhost:7278/api/ResultModels');
-
-                // Filter for current user and add assessment details
-                const userResults = resultsResponse.data
-                    .filter(r => String(r.userId || r.UserId) === String(currentUser.userId))
-                    .map(result => {
-                        const assessmentId = result.assessmentId || result.AssessmentId;
-                        const assessmentInfo = assessmentMap[assessmentId] || {
-                            title: "Unknown Assessment",
-                            maxScore: 1
-                        };
-
-                        return {
-                            ...result,
-                            assessmentTitle: assessmentInfo.title,
-                            maxScore: assessmentInfo.maxScore
-                        };
-                    });
-
-                // Calculate stats
-                if (userResults.length > 0) {
-                    let totalScorePercentage = 0;
-                    let passed = 0;
-                    let highest = 0;
-
-                    userResults.forEach(result => {
-                        const score = result.score || result.Score || 0;
-                        const maxScore = result.maxScore || result.MaxScore || 1;
-                        const percentage = (score / maxScore) * 100;
-
-                        totalScorePercentage += percentage;
-                        if (percentage >= 70) passed++;
-                        if (percentage > highest) highest = percentage;
-                    });
-
-                    setStats({
-                        totalAssessments: userResults.length,
-                        averageScore: Math.round(totalScorePercentage / userResults.length),
-                        passedCount: passed,
-                        highestScore: Math.round(highest)
-                    });
-                }
-
-                console.log("User results with details:", userResults);
                 setResults(userResults);
-            } catch (err) {
-                console.error("Error fetching data:", err);
-                setError("Failed to load results. Please try again.");
-            } finally {
+                setLoading(false);
+            } catch (error) {
+                console.error("Error fetching results:", error);
+                setError("Failed to load your results. Please try again later.");
                 setLoading(false);
             }
         };
 
-        fetchResults();
-    }, [currentUser, navigate]);
+        if (currentUser) {
+            fetchData();
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (results.length > 0) {
+            let totalScorePercentage = 0;
+            let passed = 0;
+            let highest = 0;
+
+            results.forEach(result => {
+                const score = result.score || result.Score || 0;
+                const maxScore = result.maxScore || result.MaxScore || 1;
+                const percentage = (score / maxScore) * 100;
+
+                totalScorePercentage += percentage;
+                if (percentage >= 70) passed++;
+                if (percentage > highest) highest = percentage;
+            });
+
+            setStats({
+                totalAssessments: results.length,
+                averageScore: Math.round(totalScorePercentage / results.length),
+                passedCount: passed,
+                highestScore: Math.round(highest)
+            });
+        }
+    }, [results]);
 
     const handleRowClick = (resultId) => {
         navigate(`/results/${resultId}`);
@@ -214,7 +196,7 @@ const MyResultsPage = () => {
                                                     className="result-row"
                                                     onClick={() => handleRowClick(result.resultId || result.ResultId)}
                                                 >
-                                                    <td className="assessment-name">{result.assessmentTitle || "Unknown Assessment"}</td>
+                                                    <td className="assessment-name">{assessments[result.assessmentId || result.AssessmentId]?.title || "Unknown Assessment"}</td>
                                                     <td>
                                                         <div className="date-cell">
                                                             <FaCalendarAlt className="date-icon" />

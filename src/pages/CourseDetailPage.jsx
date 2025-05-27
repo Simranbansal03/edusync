@@ -175,14 +175,14 @@ const CourseDetailPage = () => {
     const fetchCourseDetails = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get(`https://localhost:7278/api/CourseModels/${id}`);
+        const response = await axios.get(`${window.API_CONFIG.BASE_URL}/api/CourseModels/${id}`);
         setCourse(response.data);
 
         // Fetch instructor information if instructorId exists
         const instructorId = response.data.instructorId || response.data.InstructorId;
         if (instructorId) {
           try {
-            const instructorResponse = await axios.get(`https://localhost:7278/api/UserModels/${instructorId}`);
+            const instructorResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${instructorId}`);
             setInstructor(instructorResponse.data);
           } catch (err) {
             console.error("Error fetching instructor details:", err);

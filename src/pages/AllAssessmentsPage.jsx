@@ -24,11 +24,11 @@ const AllAssessmentsPage = () => {
                 setState(prevState => ({ ...prevState, loading: true }));
 
                 // Fetch assessments
-                const assessmentsResponse = await axios.get('https://localhost:7278/api/AssessmentModels');
+                const assessmentsResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/AssessmentModels`);
                 const assessmentsData = assessmentsResponse.data;
 
                 // Fetch courses for additional details
-                const coursesResponse = await axios.get('https://localhost:7278/api/CourseModels');
+                const coursesResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/CourseModels`);
                 const coursesData = coursesResponse.data;
 
                 // Create a course lookup map
@@ -53,7 +53,7 @@ const AllAssessmentsPage = () => {
                 const instructorsMap = {};
                 if (instructorIds.length > 0) {
                     const instructorPromises = instructorIds.map(instructorId =>
-                        axios.get(`https://localhost:7278/api/UserModels/${instructorId}`)
+                        axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${instructorId}`)
                             .then(res => ({ id: instructorId, data: res.data }))
                             .catch(err => {
                                 console.error(`Error fetching instructor ${instructorId}:`, err);

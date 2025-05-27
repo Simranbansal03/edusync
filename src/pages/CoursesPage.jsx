@@ -17,7 +17,7 @@ const CoursesPage = () => {
     const fetchCourses = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.get("https://localhost:7278/api/CourseModels");
+        const response = await axios.get(`${window.API_CONFIG.BASE_URL}/api/CourseModels`);
         setCourses(response.data);
         setFilteredCourses(response.data);
 
@@ -29,7 +29,7 @@ const CoursesPage = () => {
 
         if (instructorIds.length > 0) {
           const instructorPromises = instructorIds.map(instructorId =>
-            axios.get(`https://localhost:7278/api/UserModels/${instructorId}`)
+            fetchInstructor(instructorId)
               .then(res => ({ id: instructorId, data: res.data }))
               .catch(err => {
                 console.error(`Error fetching instructor ${instructorId}:`, err);
@@ -58,6 +58,16 @@ const CoursesPage = () => {
 
     fetchCourses();
   }, []);
+
+  // Update instructor call
+  const fetchInstructor = async (instructorId) => {
+    try {
+      return await axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${instructorId}`);
+    } catch (error) {
+      console.error("Error fetching instructor:", error);
+      return null;
+    }
+  };
 
   // Handle search
   const handleSearch = (e) => {

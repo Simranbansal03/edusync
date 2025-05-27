@@ -18,14 +18,14 @@ const CourseAssessmentsPage = () => {
                 setLoading(true);
 
                 // Fetch course details first to get instructor ID
-                const courseResponse = await axios.get(`https://localhost:7278/api/CourseModels/${courseId}`);
+                const courseResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/CourseModels/${courseId}`);
                 setCourse(courseResponse.data);
 
                 // Fetch instructor details if instructor ID exists
                 const instructorId = courseResponse.data.instructorId || courseResponse.data.InstructorId;
                 if (instructorId) {
                     try {
-                        const instructorResponse = await axios.get(`https://localhost:7278/api/UserModels/${instructorId}`);
+                        const instructorResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/UserModels/${instructorId}`);
                         setInstructor(instructorResponse.data);
                     } catch (err) {
                         console.error("Error fetching instructor details:", err);
@@ -33,16 +33,19 @@ const CourseAssessmentsPage = () => {
                     }
                 }
 
-                // Fetch assessments for the course
-                const assessmentsResponse = await axios.get(`https://localhost:7278/api/AssessmentModels`);
-                const courseAssessments = assessmentsResponse.data.filter(
-                    a => a.courseId === courseId || a.CourseId === courseId
-                );
+                // Fetch all assessments
+                const assessmentsResponse = await axios.get(`${window.API_CONFIG.BASE_URL}/api/AssessmentModels`);
+
+                // Filter to only this course's assessments
+                const courseAssessments = assessmentsResponse.data.filter(assessment => {
+                    const assessmentCourseId = assessment.courseId || assessment.CourseId;
+                    return String(assessmentCourseId) === String(courseId);
+                });
+
                 setAssessments(courseAssessments);
-                setError(null);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-                setError("Failed to load data. Please try again.");
+            } catch (err) {
+                console.error("Error fetching data:", err);
+                setError("Failed to load assessments. Please try again later.");
             } finally {
                 setLoading(false);
             }

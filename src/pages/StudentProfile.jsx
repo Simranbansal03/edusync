@@ -5,7 +5,7 @@ import "../styles/StudentProfile.css";
 import { FaUser, FaEnvelope, FaEdit, FaSignOutAlt, FaSave, FaTimes, FaCheck, FaTrashAlt, FaKey, FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from 'axios';
 
-const API_BASE_URL = 'https://localhost:7278/api';
+const API_BASE_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api';
 
 const StudentProfile = () => {
     const { currentUser, logout } = useAuth();

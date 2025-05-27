@@ -46,7 +46,7 @@
 // };
 import axios from 'axios';
 
-const API_URL = 'https://localhost:7241/api/auth/'; // Update with your API URL
+const API_URL = 'https://edusyncbackendapi-e9hrg2a8exgvgwda.centralindia-01.azurewebsites.net/api/auth/'; // Azure backend URL
 
 // Create axios instance with interceptors for JWT
 const axiosInstance = axios.create();
