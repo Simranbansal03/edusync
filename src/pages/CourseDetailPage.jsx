@@ -313,19 +313,76 @@ const CourseDetailPage = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="external-link-container">
-                    <div className="external-link-message">
-                      <h3>External Course Content</h3>
-                      <p>This course content is hosted on {getHostname(mediaUrl)}. Click the button below to access it.</p>
-                      <a
-                        href={mediaUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="external-link-button"
+                  <div className="external-link-container" style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f7f9fc',
+                    padding: '2rem',
+                    textAlign: 'center'
+                  }}>
+                    <div className="external-link-message" style={{
+                      maxWidth: '550px',
+                      textAlign: 'center',
+                      padding: '2rem',
+                      backgroundColor: 'white',
+                      borderRadius: '10px',
+                      boxShadow: '0 5px 15px rgba(0, 0, 0, 0.08)',
+                      border: '1px solid #e2e8f0'
+                    }}>
+                      <h3 style={{
+                        color: '#1a2a42',
+                        fontSize: '1.5rem',
+                        marginBottom: '1rem',
+                        fontFamily: 'Georgia, serif'
+                      }}>External Course Content</h3>
+                      <p style={{
+                        color: '#4a5568',
+                        marginBottom: '1.5rem',
+                        lineHeight: '1.5'
+                      }}>This course content is hosted on {getHostname(mediaUrl)}. Click the button below to access it.</p>
+                      <button
+                        onClick={() => window.open(mediaUrl, '_blank', 'noopener,noreferrer')}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                          backgroundColor: '#8b0f23',
+                          color: 'white',
+                          textDecoration: 'none',
+                          padding: '0.75rem 1.5rem',
+                          borderRadius: '8px',
+                          fontWeight: '600',
+                          fontSize: '1rem',
+                          transition: 'all 0.3s ease',
+                          boxShadow: '0 4px 8px rgba(139, 15, 35, 0.2)',
+                          border: 'none',
+                          cursor: 'pointer'
+                        }}
+                        onMouseOver={(e) => {
+                          e.currentTarget.style.backgroundColor = '#6a0d1b';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 6px 12px rgba(139, 15, 35, 0.25)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.currentTarget.style.backgroundColor = '#8b0f23';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(139, 15, 35, 0.2)';
+                        }}
                       >
                         <FaExternalLinkAlt /> Open Course on {getHostname(mediaUrl)}
-                      </a>
-                      <p className="external-note">Note: The content will open in a new tab</p>
+                      </button>
+                      <p style={{
+                        fontSize: '0.85rem',
+                        color: '#6b7280',
+                        marginTop: '1rem'
+                      }}>Note: The content will open in a new tab</p>
                     </div>
                   </div>
                 )}

@@ -116,19 +116,29 @@
 }
 
 .video-container {
-    position: relative;
-    padding-bottom: 56.25%;
+    position: relative !important;
+    padding-bottom: 56.25% !important;
     /* 16:9 aspect ratio */
-    height: 0;
-    overflow: hidden;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 .video-container iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.video-container .file-download-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 2rem !important;
+    overflow-y: auto !important;
 }
 
 .no-video {
@@ -148,53 +158,68 @@
 
 /* External Link Container Styles */
 .external-link-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f7f9fc;
-    padding: 2rem;
-    text-align: center;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: #f7f9fc !important;
+    padding: 2rem !important;
+    text-align: center !important;
 }
 
 .external-link-message {
-    max-width: 550px;
-    text-align: center;
-    padding: 2rem;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--border-color);
+    max-width: 550px !important;
+    text-align: center !important;
+    padding: 2rem !important;
+    background-color: white !important;
+    border-radius: 10px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 .external-link-message h3 {
-    color: var(--dark-text);
-    font-size: 1.5rem;
-    margin-bottom: 1rem;
-    font-family: 'Georgia', serif;
+    color: var(--dark-text) !important;
+    font-size: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    font-family: 'Georgia', serif !important;
 }
 
 .external-link-message p {
-    color: var(--light-text);
-    margin-bottom: 1.5rem;
-    line-height: 1.5;
+    color: var(--light-text) !important;
+    margin-bottom: 1.5rem !important;
+    line-height: 1.5 !important;
 }
 
 .external-link-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    text-decoration: none !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 8px rgba(139, 15, 35, 0.2) !important;
+}
+
+.external-link-button:hover {
+    background-color: var(--secondary-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(139, 15, 35, 0.25) !important;
 }
 
 .external-note {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-top: -1rem;
+    font-size: 0.85rem !important;
+    color: #6b7280 !important;
+    margin-top: 1rem !important;
 }
 
 .course-description-panel {
@@ -408,13 +433,15 @@
     }
 
     .file-actions {
-        flex-direction: column;
-        width: 100%;
+        flex-direction: column !important;
+        width: 100% !important;
     }
 
     .download-button,
     .view-button {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 10px !important;
     }
 }
 
@@ -467,112 +494,120 @@
 
 /* File download container styles */
 .file-download-container {
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 30px;
-    text-align: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
+    background-color: #f9f9f9 !important;
+    border-radius: 8px !important;
+    padding: 30px !important;
+    text-align: center !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 300px !important;
+    width: 100% !important;
+    position: relative !important;
 }
 
 .file-preview {
-    margin-bottom: 25px;
+    margin-bottom: 25px !important;
 }
 
 .file-icon {
-    font-size: 60px;
-    margin-bottom: 15px;
+    font-size: 60px !important;
+    margin-bottom: 15px !important;
 }
 
 .file-name {
-    font-size: 20px;
-    margin: 10px 0;
-    word-break: break-word;
+    font-size: 20px !important;
+    margin: 10px 0 !important;
+    word-break: break-word !important;
 }
 
 .file-type {
-    color: #666;
-    font-size: 14px;
-    margin-bottom: 20px;
+    color: #666 !important;
+    font-size: 14px !important;
+    margin-bottom: 20px !important;
 }
 
 .file-actions {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: flex !important;
+    gap: 15px !important;
+    margin-bottom: 20px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    width: 100% !important;
 }
 
 .download-button,
 .view-button {
-    font-size: 0.95rem;
-    font-weight: 500;
-    padding: 0.8rem 1.2rem;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.2s;
-    text-decoration: none;
-    width: 100%;
-    max-width: 250px;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    outline: none;
-    font-family: inherit;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    padding: 0.8rem 1.2rem !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    transition: all 0.2s !important;
+    text-decoration: none !important;
+    width: 100% !important;
+    max-width: 250px !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    border: none !important;
+    outline: none !important;
+    font-family: inherit !important;
 }
 
 .download-button {
-    background-color: var(--primary-color);
-    color: white;
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    box-shadow: 0 4px 8px rgba(139, 15, 35, 0.2) !important;
 }
 
 .download-button:hover {
-    background-color: var(--secondary-color);
+    background-color: var(--secondary-color) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 12px rgba(139, 15, 35, 0.25) !important;
 }
 
 .view-button {
-    background-color: #f1f5f9;
-    color: var(--dark-text);
-    border: 1px solid #e2e8f0;
+    background-color: #f1f5f9 !important;
+    color: var(--dark-text) !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
 .view-button:hover {
-    background-color: #e2e8f0;
+    background-color: #e2e8f0 !important;
+    transform: translateY(-2px) !important;
 }
 
 .file-instructions {
-    color: #666;
-    font-size: 14px;
-    max-width: 400px;
-    margin: 0 auto;
+    color: #666 !important;
+    font-size: 14px !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+    padding: 0 10px !important;
 }
 
 /* Make sure icons align properly */
 .external-link-button svg,
 .download-button svg,
 .view-button svg {
-    margin-right: 5px;
+    margin-right: 5px !important;
 }
 
 .download-error {
-    background-color: #fff1f0;
-    border: 1px solid #ffccc7;
-    border-radius: 4px;
-    color: #cf1322;
-    margin: 10px 0;
-    padding: 10px;
-    text-align: center;
-    width: 100%;
+    background-color: #fff1f0 !important;
+    border: 1px solid #ffccc7 !important;
+    border-radius: 4px !important;
+    color: #cf1322 !important;
+    margin: 10px 0 !important;
+    padding: 10px !important;
+    text-align: center !important;
+    width: 100% !important;
 }
 
 .download-error p {
-    margin: 0;
-    font-size: 14px;
+    margin: 0 !important;
+    font-size: 14px !important;
 }
