@@ -1,7 +1,9 @@
-// src/pages/LoginPage.js
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
 import "../styles/AuthPages.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +13,33 @@ const LoginPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
+
+  // Toggle password visibility
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  // Check for success message from registration
+  useEffect(() => {
+    if (location.state?.message) {
+      // You could set a success message state here if you want to show it
+      console.log(location.state.message);
+    }
+
+    // Check for remembered email
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
+    if (rememberedEmail) {
+      setFormData(prev => ({
+        ...prev,
+        email: rememberedEmail,
+        rememberMe: true
+      }));
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -38,28 +66,70 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const API_BASE_URL = "https://localhost:7278/api";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (validateForm()) {
       setIsLoading(true);
+      setErrors({});
 
       try {
-        // Here you would call your authentication API
-        // For now, we'll just simulate a successful login
-        console.log("Login form submitted:", formData);
+        // Prepare login data
+        const loginData = {
+          email: formData.email,
+          password: formData.password
+        };
 
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        console.log("Attempting login with:", loginData.email);
 
-        // Store auth token (would come from your API)
-        localStorage.setItem("authToken", "sample-auth-token");
+        // Make API request to auth endpoint
+        const response = await axios.post(`${API_BASE_URL}/auth/login`, loginData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
 
-        // Redirect to dashboard
-        navigate("/dashboard");
+        console.log("Login successful:", response.data);
+
+        // Use the login function from AuthContext
+        login(response.data);
+
+        // Handle "Remember me" - keep this functionality
+        if (formData.rememberMe) {
+          localStorage.setItem("rememberedEmail", formData.email);
+        } else {
+          localStorage.removeItem("rememberedEmail");
+        }
+
+        // IMPORTANT CHANGE: Redirect based on role
+        // Instructors go to dashboard, students go to homepage
+        if (response.data.role?.toLowerCase() === "instructor") {
+          navigate("/instructor");
+        } else {
+          // Students go to homepage
+          navigate("/");
+        }
       } catch (error) {
         console.error("Login error:", error);
-        setErrors({ form: "Invalid email or password" });
+
+        if (error.response) {
+          // Server responded with an error
+          if (error.response.status === 401) {
+            setErrors({ form: "Invalid email or password" });
+          } else if (error.response.status === 404) {
+            setErrors({ form: "User not found. Please check your email or register." });
+          } else {
+            setErrors({ form: error.response.data?.message || "Login failed" });
+          }
+        } else if (error.request) {
+          // No response received
+          setErrors({ form: "No response from server. Please check your connection and ensure the API is running." });
+        } else {
+          // Something else went wrong
+          setErrors({ form: `An error occurred: ${error.message}` });
+        }
       } finally {
         setIsLoading(false);
       }
@@ -96,15 +166,23 @@ const LoginPage = () => {
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter your password"
-                className={errors.password ? "error" : ""}
-              />
+              <div className="password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className={errors.password ? "error" : ""}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                >
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
               {errors.password && (
                 <span className="error-message">{errors.password}</span>
               )}
@@ -130,16 +208,6 @@ const LoginPage = () => {
               {isLoading ? "Signing In..." : "Sign In"}
             </button>
           </form>
-
-          <div className="auth-divider">
-            <span>OR</span>
-          </div>
-
-          <div className="social-auth">
-            <button className="social-button google">
-              <i className="fab fa-google"></i> Sign in with Google
-            </button>
-          </div>
 
           <div className="auth-footer">
             Don't have an account? <Link to="/register">Sign Up</Link>

@@ -1,7 +1,9 @@
 // src/pages/RegisterPage.js
+import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../styles/AuthPages.css";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +16,17 @@ const RegisterPage = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -55,26 +67,33 @@ const RegisterPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const API_BASE_URL = "https://localhost:7278/api"; // Or your Azure API endpoint
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (validateForm()) {
       setIsLoading(true);
 
+      // Build user registration object as per your UserModel
+      const registerObj = {
+        name: formData.name,
+        email: formData.email,
+        passwordHash: formData.password,      // Backend will hash, don't hash on frontend
+        role: formData.role                  // Should be "Student" or "Instructor" as per your UI
+        // Don't send UserId - backend generates that!
+      };
+
       try {
-        // Here you would call your registration API
-        // For now, we'll just simulate a successful registration
-        console.log("Registration form submitted:", formData);
-
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Redirect to login page
-        navigate("/login", { state: { registered: true } });
-      } catch (error) {
-        console.error("Registration error:", error);
-        setErrors({ form: "Registration failed. Please try again." });
-      } finally {
+        await axios.post(`${API_BASE_URL}/UserModels`, registerObj); // adjust endpoint as needed
+        // Success: redirect to login
+        navigate('/login');
+      } catch (err) {
+        if (err.response && err.response.data) {
+          setErrors({ form: err.response.data });
+        } else {
+          setErrors({ form: 'Registration failed. Try again.' });
+        }
         setIsLoading(false);
       }
     }
@@ -126,15 +145,20 @@ const RegisterPage = () => {
 
             <div className="form-group">
               <label htmlFor="password">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Create a password"
-                className={errors.password ? "error" : ""}
-              />
+              <div className="password-input">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Create a password"
+                  className={errors.password ? "error" : ""}
+                />
+                <button type="button" onClick={togglePasswordVisibility}>
+                  {showPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
               {errors.password && (
                 <span className="error-message">{errors.password}</span>
               )}
@@ -142,15 +166,20 @@ const RegisterPage = () => {
 
             <div className="form-group">
               <label htmlFor="confirmPassword">Confirm Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Confirm your password"
-                className={errors.confirmPassword ? "error" : ""}
-              />
+              <div className="password-input">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Confirm your password"
+                  className={errors.confirmPassword ? "error" : ""}
+                />
+                <button type="button" onClick={toggleConfirmPasswordVisibility}>
+                  {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
+                </button>
+              </div>
               {errors.confirmPassword && (
                 <span className="error-message">{errors.confirmPassword}</span>
               )}
@@ -191,15 +220,15 @@ const RegisterPage = () => {
             </button>
           </form>
 
-          <div className="auth-divider">
+          {/* <div className="auth-divider">
             <span>OR</span>
-          </div>
+          </div> */}
 
-          <div className="social-auth">
+          {/* <div className="social-auth">
             <button className="social-button google">
               <i className="fab fa-google"></i> Sign up with Google
             </button>
-          </div>
+          </div> */}
 
           <div className="auth-footer">
             Already have an account? <Link to="/login">Sign In</Link>
@@ -223,3 +252,4 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
+

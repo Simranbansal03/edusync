@@ -1,243 +1,243 @@
-// src/pages/CoursesPage.js
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import "../styles/CoursesPage.css";
-
-// Mock data - would come from your API in a real implementation
-const MOCK_COURSES = [
-  {
-    id: 1,
-    title: "Introduction to Web Development",
-    description:
-      "Learn the fundamentals of web development including HTML, CSS, and JavaScript.",
-    category: "Development",
-    instructor: "John Doe",
-    rating: 4.8,
-    lessons: 12,
-    level: "Beginner",
-    duration: "6 weeks",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1472&q=80",
-  },
-  {
-    id: 2,
-    title: "Data Science Fundamentals",
-    description:
-      "Explore the world of data science, statistics, and machine learning basics.",
-    category: "Data Science",
-    instructor: "Jane Smith",
-    rating: 4.7,
-    lessons: 15,
-    level: "Intermediate",
-    duration: "8 weeks",
-    image:
-      "https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: 3,
-    title: "Mobile App Development with React Native",
-    description:
-      "Build cross-platform mobile apps using React Native and JavaScript.",
-    category: "Development",
-    instructor: "Michael Johnson",
-    rating: 4.9,
-    lessons: 18,
-    level: "Advanced",
-    duration: "10 weeks",
-    image:
-      "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: 4,
-    title: "Full Stack JavaScript Development",
-    description:
-      "Master both frontend and backend development using JavaScript technologies.",
-    category: "Development",
-    instructor: "Susan Williams",
-    rating: 4.6,
-    lessons: 20,
-    level: "Intermediate",
-    duration: "12 weeks",
-    image:
-      "https://images.unsplash.com/photo-1571171637578-41bc2dd41cd2?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: 5,
-    title: "UX/UI Design Principles",
-    description:
-      "Learn the core principles of user experience and interface design.",
-    category: "Design",
-    instructor: "David Lee",
-    rating: 4.8,
-    lessons: 14,
-    level: "Beginner",
-    duration: "7 weeks",
-    image:
-      "https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1470&q=80",
-  },
-  {
-    id: 6,
-    title: "Cloud Computing with AWS",
-    description:
-      "Dive into cloud infrastructure and services using Amazon Web Services.",
-    category: "Cloud",
-    instructor: "Emily Taylor",
-    rating: 4.7,
-    lessons: 16,
-    level: "Advanced",
-    duration: "9 weeks",
-    image:
-      "https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1472&q=80",
-  },
-];
-
-// Get unique categories for the filter
-const allCategories = [
-  "All",
-  ...new Set(MOCK_COURSES.map((course) => course.category)),
-];
-const allLevels = ["All", "Beginner", "Intermediate", "Advanced"];
+import { FaSearch, FaBook, FaUserGraduate, FaChalkboardTeacher } from "react-icons/fa";
 
 const CoursesPage = () => {
   const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const [levelFilter, setLevelFilter] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [instructors, setInstructors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // Fetch all courses when component mounts
   useEffect(() => {
-    // Simulate API call with delay
     const fetchCourses = async () => {
-      setLoading(true);
+      setIsLoading(true);
       try {
-        // In a real app, this would be fetched from your API
-        await new Promise((resolve) => setTimeout(resolve, 800));
-        setCourses(MOCK_COURSES);
-      } catch (error) {
-        console.error("Error fetching courses:", error);
+        const response = await axios.get("https://localhost:7278/api/CourseModels");
+        setCourses(response.data);
+        setFilteredCourses(response.data);
+
+        // Fetch instructors for all courses
+        const instructorIds = [...new Set(
+          response.data.map(course => course.instructorId || course.InstructorId)
+            .filter(id => id) // Filter out undefined or null ids
+        )];
+
+        if (instructorIds.length > 0) {
+          const instructorPromises = instructorIds.map(instructorId =>
+            axios.get(`https://localhost:7278/api/UserModels/${instructorId}`)
+              .then(res => ({ id: instructorId, data: res.data }))
+              .catch(err => {
+                console.error(`Error fetching instructor ${instructorId}:`, err);
+                return null;
+              })
+          );
+
+          const instructorResults = await Promise.all(instructorPromises);
+          const instructorsMap = {};
+
+          instructorResults.forEach(result => {
+            if (result) {
+              instructorsMap[result.id] = result.data;
+            }
+          });
+
+          setInstructors(instructorsMap);
+        }
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        setError("Failed to load courses. Please try again later.");
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
     fetchCourses();
   }, []);
 
-  // Filter the courses based on category, level, and search query
-  const filteredCourses = courses.filter((course) => {
-    const matchesCategory =
-      categoryFilter === "All" || course.category === categoryFilter;
-    const matchesLevel = levelFilter === "All" || course.level === levelFilter;
-    const matchesSearch =
-      course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.description.toLowerCase().includes(searchQuery.toLowerCase());
+  // Handle search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    filterCourses(searchTerm);
+  };
 
-    return matchesCategory && matchesLevel && matchesSearch;
-  });
+  // Handle input change
+  const handleInputChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    filterCourses(value);
+  };
+
+  // Filter courses based on search term
+  const filterCourses = (term) => {
+    if (!term.trim()) {
+      setFilteredCourses(courses);
+      return;
+    }
+
+    const filtered = courses.filter(course => {
+      const courseId = (course.courseId || course.CourseId || '').toString().toLowerCase();
+      const title = (course.title || course.Title || '').toLowerCase();
+      const description = (course.description || course.Description || '').toLowerCase();
+
+      // Get instructor name if available
+      const instructorId = course.instructorId || course.InstructorId;
+      let instructorName = '';
+      if (instructorId && instructors[instructorId]) {
+        instructorName = (instructors[instructorId].name || instructors[instructorId].Name || '').toLowerCase();
+      }
+
+      const term_lower = term.toLowerCase();
+
+      return courseId.includes(term_lower) ||
+        title.includes(term_lower) ||
+        description.includes(term_lower) ||
+        instructorName.includes(term_lower);
+    });
+
+    setFilteredCourses(filtered);
+  };
+
+  // Generate random background color for course cards
+  const getRandomBgColor = (title) => {
+    const colors = [
+      'rgba(139, 15, 35, 0.9)',  // Dark burgundy
+      'rgba(139, 15, 35, 0.8)',  // Medium burgundy
+      'rgba(139, 15, 35, 0.7)',  // Light burgundy
+      'rgba(28, 46, 74, 0.9)',   // Dark navy
+      'rgba(28, 46, 74, 0.8)',   // Medium navy
+      'rgba(28, 46, 74, 0.7)',   // Light navy
+    ];
+
+    let sum = 0;
+    for (let i = 0; i < (title || '').length; i++) {
+      sum += title.charCodeAt(i);
+    }
+
+    return colors[sum % colors.length];
+  };
 
   return (
     <div className="courses-page">
-      <div className="courses-hero">
+      <div className="courses-banner">
         <div className="container">
-          <h1>Explore Our Courses</h1>
-          <p>
-            Discover a wide range of courses to enhance your skills and
-            knowledge
-          </p>
-          <div className="search-container">
-            <input
-              type="text"
-              placeholder="Search for courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button className="search-btn">
-              <i className="fas fa-search">🔍</i>
-            </button>
+          <div className="courses-banner-content">
+            <h1>Discover Our Courses</h1>
+            <p>Explore our wide range of courses designed to help you develop new skills and advance your career</p>
+
+            <form className="course-search-form" onSubmit={handleSearch}>
+              <div className="search-input-container">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search by course name or keyword..."
+                  value={searchTerm}
+                  onChange={handleInputChange}
+                  className="course-search-input"
+                />
+              </div>
+              <button type="submit" className="search-button">Search</button>
+            </form>
           </div>
         </div>
       </div>
 
-      <div className="container">
-        <div className="courses-filters">
-          <div className="filter-group">
-            <label>Category:</label>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-            >
-              {allCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Level:</label>
-            <select
-              value={levelFilter}
-              onChange={(e) => setLevelFilter(e.target.value)}
-            >
-              {allLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="results-count">
-            {filteredCourses.length} courses found
+      <div className="courses-stats">
+        <div className="container">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-icon"><FaBook /></div>
+              <div className="stat-content">
+                <div className="stat-number">{courses.length}</div>
+                <div className="stat-label">Available Courses</div>
+              </div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-icon"><FaUserGraduate /></div>
+              <div className="stat-content">
+                <div className="stat-number">500+</div>
+                <div className="stat-label">Students Enrolled</div>
+              </div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-icon"><FaChalkboardTeacher /></div>
+              <div className="stat-content">
+                <div className="stat-number">20+</div>
+                <div className="stat-label">Expert Instructors</div>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {loading ? (
+      <div className="courses-content container">
+        {isLoading ? (
           <div className="courses-loading">
             <div className="spinner"></div>
             <p>Loading courses...</p>
           </div>
-        ) : (
-          <div className="courses-grid">
-            {filteredCourses.length > 0 ? (
-              filteredCourses.map((course) => (
-                <div className="course-card" key={course.id}>
-                  <div
-                    className="course-image"
-                    style={{ backgroundImage: `url(${course.image})` }}
-                  >
-                    <div className="course-level">{course.level}</div>
-                  </div>
-                  <div className="course-content">
-                    <span className="course-category">{course.category}</span>
-                    <h3>{course.title}</h3>
-                    <p className="course-description">{course.description}</p>
-                    <div className="course-meta">
-                      <div className="instructor">
-                        <span>By {course.instructor}</span>
-                      </div>
-                      <div className="rating">
-                        <span>⭐ {course.rating}</span>
-                      </div>
-                    </div>
-                    <div className="course-details">
-                      <span>{course.lessons} lessons</span>
-                      <span>{course.duration}</span>
-                    </div>
-                    <Link to={`/courses/${course.id}`} className="btn">
-                      View Course
-                    </Link>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="no-courses">
-                <h3>No courses found</h3>
-                <p>Try adjusting your search or filters</p>
-              </div>
+        ) : error ? (
+          <div className="courses-error">
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()} className="reload-button">Try Again</button>
+          </div>
+        ) : filteredCourses.length === 0 ? (
+          <div className="no-courses">
+            <h2>No courses found</h2>
+            <p>No courses match your search criteria. Please try a different search term.</p>
+            {searchTerm && (
+              <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setFilteredCourses(courses);
+                }}
+                className="clear-search-button"
+              >
+                Clear Search
+              </button>
             )}
           </div>
+        ) : (
+          <>
+            <div className="courses-result-header">
+              <h2>Available Courses</h2>
+              <p>Showing {filteredCourses.length} {filteredCourses.length === 1 ? 'course' : 'courses'}</p>
+            </div>
+
+            <div className="courses-grid">
+              {filteredCourses.map(course => {
+                const courseId = course.courseId || course.CourseId;
+                const title = course.title || course.Title;
+                const description = course.description || course.Description;
+                const instructorId = course.instructorId || course.InstructorId;
+                const instructor = instructorId ? instructors[instructorId] : null;
+
+                return (
+                  <div className="course-card" key={courseId}>
+                    <div className="course-card-header" style={{ backgroundColor: getRandomBgColor(title) }}>
+                      <h2>{title}</h2>
+                    </div>
+                    <div className="course-card-body">
+                      <p className="course-description">{description}</p>
+                      {instructor && (
+                        <div className="course-instructor">
+                          <FaChalkboardTeacher className="instructor-icon" />
+                          <span>Instructor: {instructor.name || instructor.Name}</span>
+                        </div>
+                      )}
+                      <Link to={`/courses/${courseId}`} className="view-course-btn">
+                        View Course
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )}
       </div>
     </div>
