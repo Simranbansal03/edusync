@@ -160,6 +160,7 @@ class FileService {
             'rtf': 'application/rtf',
             'odt': 'application/vnd.oasis.opendocument.text',
             'ods': 'application/vnd.oasis.opendocument.spreadsheet',
+  
             'odp': 'application/vnd.oasis.opendocument.presentation',
 
             // Images

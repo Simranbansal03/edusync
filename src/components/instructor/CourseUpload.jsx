@@ -425,7 +425,7 @@ const CourseUpload = () => {
     const isEditMode = !!courseId;
     const fileInputRef = useRef(null);
 
-    const [contentType, setContentType] = useState('url'); // 'url' or 'file'
+    // Remove contentType state and always use 'file' type
     const [selectedFile, setSelectedFile] = useState(null);
     const [uploadProgress, setUploadProgress] = useState(0);
 
@@ -440,29 +440,6 @@ const CourseUpload = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Function to format YouTube URLs to embed format
-    const formatVideoUrl = (url) => {
-        if (!url) return '';
-
-        // Handle YouTube URLs
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(youtubeRegex);
-
-        if (match && match[1]) {
-            // Extract video ID and return proper embed URL
-            const videoId = match[1];
-            return `https://www.youtube.com/embed/${videoId}`;
-        }
-
-        // If the URL already has /embed/ in it, it's likely already formatted correctly
-        if (url.includes('youtube.com/embed/')) {
-            return url;
-        }
-
-        // For other providers or if not matching our patterns, return as is
-        return url;
-    };
-
     // Fetch existing course data if in edit mode
     useEffect(() => {
         if (isEditMode) {
@@ -476,16 +453,9 @@ const CourseUpload = () => {
                         mediaUrl: courseData.mediaUrl || courseData.MediaUrl || ''
                     });
 
-                    // Try to determine if this is a YouTube URL or a file URL
-                    if (courseData.mediaUrl && (
-                        courseData.mediaUrl.includes('youtube.com') ||
-                        courseData.mediaUrl.includes('youtu.be')
-                    )) {
-                        setContentType('url');
-                    } else if (courseData.mediaUrl) {
-                        // If it's not a YouTube URL and has a mediaUrl, assume it's a file
-                        // This now includes Azure Blob Storage URLs
-                        setContentType('file');
+                    // If there's a mediaUrl, it's a file in Azure Blob Storage
+                    if (courseData.mediaUrl) {
+                        // This is a file URL, but we don't need to set contentType anymore
                     }
                 })
                 .catch(err => {
@@ -511,30 +481,8 @@ const CourseUpload = () => {
         if (file) {
             setSelectedFile(file);
             console.log("File selected:", file.name);
-            // Clear the URL input when a file is selected
-            setFormData(prevState => ({
-                ...prevState,
-                mediaUrl: ''
-            }));
         } else {
             setSelectedFile(null);
-        }
-    };
-
-    const handleContentTypeChange = (type) => {
-        setContentType(type);
-
-        // Clear the appropriate field based on the selected type
-        if (type === 'url') {
-            setSelectedFile(null);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        } else {
-            setFormData(prevState => ({
-                ...prevState,
-                mediaUrl: ''
-            }));
         }
     };
 
@@ -548,8 +496,8 @@ const CourseUpload = () => {
             let finalMediaUrl = '';
             const baseApiUrl = `${window.API_CONFIG.BASE_URL}/api/CourseModels`;
 
-            // Step 1: If a file is selected, upload it first
-            if (contentType === 'file' && selectedFile) {
+            // Upload file if selected
+            if (selectedFile) {
                 try {
                     console.log("Uploading file to Azure Blob Storage...");
 
@@ -572,11 +520,14 @@ const CourseUpload = () => {
                     setIsSubmitting(false);
                     return;
                 }
-            } else if (contentType === 'url') {
-                finalMediaUrl = formatVideoUrl(formData.mediaUrl);
             } else if (isEditMode && formData.mediaUrl) {
-                // In edit mode, if no new content is provided, keep the existing URL
+                // In edit mode, if no new file is selected, keep the existing URL
                 finalMediaUrl = formData.mediaUrl;
+            } else if (!isEditMode) {
+                // New course requires a file
+                setError('Please select a file to upload');
+                setIsSubmitting(false);
+                return;
             }
 
             // Step 2: Create/Update the course with the media URL
@@ -620,7 +571,6 @@ const CourseUpload = () => {
                     mediaUrl: ''
                 });
                 setSelectedFile(null);
-                setContentType('url');
                 if (fileInputRef.current) {
                     fileInputRef.current.value = '';
                 }
@@ -713,90 +663,38 @@ const CourseUpload = () => {
                     </div>
 
                     <div className="form-group">
-                        <label>Course Content Type</label>
-                        <div className="content-type-selector">
-                            <button
-                                type="button"
-                                className={`content-type-btn ${contentType === 'url' ? 'active' : ''}`}
-                                onClick={() => handleContentTypeChange('url')}
-                            >
-                                🔗 Link (YouTube, etc.)
-                            </button>
-                            <button
-                                type="button"
-                                className={`content-type-btn ${contentType === 'file' ? 'active' : ''}`}
-                                onClick={() => handleContentTypeChange('file')}
-                            >
-                                📁 Upload Document/Video
-                            </button>
+                        <label htmlFor="courseFile">Upload Course Material</label>
+                        <input
+                            type="file"
+                            id="courseFile"
+                            name="courseFile"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.odt,.ods,.odp,.mp4,.mov,.mkv,.avi,.webm,.mp3,.wav,.ogg,.jpg,.jpeg,.png,.gif,.svg"
+                            required={!isEditMode}
+                        />
+                        {selectedFile && (
+                            <div className="file-info">
+                                <p>Selected file: {selectedFile.name}</p>
+                                <p>Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                            </div>
+                        )}
+                        {uploadProgress > 0 && uploadProgress < 100 && (
+                            <div className="upload-progress">
+                                <div className="progress-bar">
+                                    <div
+                                        className="progress-fill"
+                                        style={{ width: `${uploadProgress}%` }}
+                                    ></div>
+                                </div>
+                                <span>{uploadProgress}%</span>
+                            </div>
+                        )}
+                        <div className="file-upload-note">
+                            <p>Note: Uploaded files will be stored in Azure Blob Storage and available for students to download.</p>
+                            <p>Supported formats include PDF, Word documents, PowerPoint, text files, videos, audio, and images.</p>
                         </div>
                     </div>
-
-                    {contentType === 'url' && (
-                        <div className="form-group">
-                            <label htmlFor="mediaUrl">Course Media URL</label>
-                            <input
-                                type="url"
-                                id="mediaUrl"
-                                name="mediaUrl"
-                                value={formData.mediaUrl}
-                                onChange={handleChange}
-                                placeholder="Enter URL to course content (e.g., YouTube)"
-                                required={contentType === 'url'}
-                            />
-                            <div className="form-help">
-                                <p className="url-info-heading"><strong>URL Types & How They Display:</strong></p>
-                                <div className="url-info-container">
-                                    <div className="url-info-item">
-                                        <span className="url-type">✓ YouTube URLs:</span>
-                                        <span className="url-behavior">Will be embedded directly in the course page.</span>
-                                        <span className="url-example">Example: https://www.youtube.com/watch?v=abcd1234</span>
-                                    </div>
-                                    <div className="url-info-item">
-                                        <span className="url-type">✓ Non-embeddable URLs:</span>
-                                        <span className="url-behavior">Will show as an "External Course Content" link button.</span>
-                                        <span className="url-example">Examples: Coursera, GeeksForGeeks, and most other websites</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {contentType === 'file' && (
-                        <div className="form-group">
-                            <label htmlFor="courseFile">Upload Course Material</label>
-                            <input
-                                type="file"
-                                id="courseFile"
-                                name="courseFile"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.odt,.ods,.odp,.mp4,.mov,.mkv,.avi,.webm,.mp3,.wav,.ogg,.jpg,.jpeg,.png,.gif,.svg"
-                                required={contentType === 'file' && !isEditMode}
-                            />
-                            {selectedFile && (
-                                <div className="file-info">
-                                    <p>Selected file: {selectedFile.name}</p>
-                                    <p>Size: {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
-                                </div>
-                            )}
-                            {uploadProgress > 0 && uploadProgress < 100 && (
-                                <div className="upload-progress">
-                                    <div className="progress-bar">
-                                        <div
-                                            className="progress-fill"
-                                            style={{ width: `${uploadProgress}%` }}
-                                        ></div>
-                                    </div>
-                                    <span>{uploadProgress}%</span>
-                                </div>
-                            )}
-                            <div className="file-upload-note">
-                                <p>Note: Uploaded files will be stored in Azure Blob Storage and available for students to download.</p>
-                                <p>Supported formats include PDF, Word documents, PowerPoint, text files, videos, audio, and images.</p>
-                            </div>
-                        </div>
-                    )}
 
                     <div className="form-actions">
                         <button
